@@ -31,9 +31,9 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       inject: true,
-      filename: "edit.html",
+      filename: "index.html",
       chunks: ["browserMain"],
-      template: path.join(__dirname, "public", "edit.html"),
+      template: path.join(__dirname, "public", "index.html"),
     }),
   ],
 }

@@ -1,11 +1,8 @@
 import * as Sentry from "@sentry/react"
 import { Integrations } from "@sentry/tracing"
 import React from "react"
-import { HelmetProvider } from "react-helmet-async"
 import { defaultTheme } from "../../../common/theme/Theme"
-import { PromptDialog } from "../../../components/PromptDialog"
 import { Toast } from "../../../components/Toast"
-import { PromptProvider } from "../../hooks/usePrompt"
 import { StoreContext } from "../../hooks/useStores"
 import { ThemeContext } from "../../hooks/useTheme"
 import { ToastProvider } from "../../hooks/useToast"
@@ -27,15 +24,11 @@ export function App() {
     <React.StrictMode>
       <StoreContext.Provider value={new RootStore()}>
         <ThemeContext.Provider value={defaultTheme}>
-          <HelmetProvider>
-            <ToastProvider component={Toast}>
-              <PromptProvider component={PromptDialog}>
-                <GlobalKeyboardShortcut />
-                <GlobalCSS />
-                <RootView />
-              </PromptProvider>
-            </ToastProvider>
-          </HelmetProvider>
+          <ToastProvider component={Toast}>
+            <GlobalKeyboardShortcut />
+            <GlobalCSS />
+            <RootView />
+          </ToastProvider>
         </ThemeContext.Provider>
       </StoreContext.Provider>
     </React.StrictMode>
