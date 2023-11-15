@@ -6,7 +6,6 @@ import MetronomeIcon from "mdi-react/MetronomeIcon"
 import Stop from "mdi-react/StopIcon"
 import { observer } from "mobx-react-lite"
 import { FC, useCallback } from "react"
-import { CircularProgress } from "../../../components/CircularProgress"
 import { Localized } from "../../../components/Localized"
 import { Tooltip } from "../../../components/Tooltip"
 import {
@@ -140,12 +139,6 @@ export const TransportPanel: FC = observer(() => {
       <ToolbarSeparator />
 
       <Timestamp />
-
-      {isSynthLoading && (
-        <Right>
-          <CircularProgress size="1rem" />
-        </Right>
-      )}
     </Toolbar>
   )
 })

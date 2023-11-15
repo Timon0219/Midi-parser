@@ -2,10 +2,8 @@ import * as Sentry from "@sentry/react"
 import { Integrations } from "@sentry/tracing"
 import React from "react"
 import { defaultTheme } from "../../../common/theme/Theme"
-import { Toast } from "../../../components/Toast"
 import { StoreContext } from "../../hooks/useStores"
 import { ThemeContext } from "../../hooks/useTheme"
-import { ToastProvider } from "../../hooks/useToast"
 import RootStore from "../../stores/RootStore"
 import { GlobalKeyboardShortcut } from "../KeyboardShortcut/GlobalKeyboardShortcut"
 import { RootView } from "../RootView/RootView"
@@ -24,11 +22,9 @@ export function App() {
     <React.StrictMode>
       <StoreContext.Provider value={new RootStore()}>
         <ThemeContext.Provider value={defaultTheme}>
-          <ToastProvider component={Toast}>
-            <GlobalKeyboardShortcut />
-            <GlobalCSS />
-            <RootView />
-          </ToastProvider>
+          <GlobalKeyboardShortcut />
+          <GlobalCSS />
+          <RootView />
         </ThemeContext.Provider>
       </StoreContext.Provider>
     </React.StrictMode>
