@@ -126,8 +126,13 @@ function drawKeys(
         drawBorder(ctx, width, theme.dividerColor)
       }
     }
-    const isKeyC = i % 12 === 0
-    if (isKeyC) {
+    if (
+      i % 12 != 1 &&
+      i % 12 != 3 &&
+      i % 12 != 6 &&
+      i % 12 != 8 &&
+      i % 12 != 10
+    )
       drawLabel(
         ctx,
         width,
@@ -136,7 +141,7 @@ function drawKeys(
         theme.canvasFont,
         theme.secondaryTextColor,
       )
-    }
+
     ctx.restore()
   }
 

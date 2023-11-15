@@ -1,4 +1,3 @@
-import { ItemValue } from "../../main/components/ControlPane/LineGraph/LineGraph"
 import { IPoint, IRect } from "../geometry"
 import { ControlSelection } from "../selection/ControlSelection"
 
@@ -53,7 +52,7 @@ export class ControlCoordTransform {
     }
   }
 
-  fromPosition(position: IPoint): ItemValue {
+  fromPosition(position: IPoint): any {
     return {
       tick: this.getTicks(position.x),
       value: this.getValue(position.y),

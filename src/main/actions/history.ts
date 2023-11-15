@@ -1,7 +1,6 @@
 import cloneDeep from "lodash/cloneDeep"
 import { deserialize, serialize } from "serializr"
 import Song from "../../common/song/Song"
-import ArrangeViewStore from "../stores/ArrangeViewStore"
 import { ControlStore } from "../stores/ControlStore"
 import PianoRollStore from "../stores/PianoRollStore"
 import RootStore from "../stores/RootStore"
@@ -14,8 +13,6 @@ export interface SerializedState {
   selection: PianoRollStore["selection"]
   selectedNoteIds: PianoRollStore["selectedNoteIds"]
   selectedControllerEventIds: ControlStore["selectedEventIds"]
-  arrangeSelection: ArrangeViewStore["selection"]
-  arrangeSelectedEventIds: ArrangeViewStore["selectedEventIds"]
 }
 
 const serializeUndoableState = (rootStore: RootStore): SerializedState => {
@@ -25,10 +22,6 @@ const serializeUndoableState = (rootStore: RootStore): SerializedState => {
     selectedNoteIds: cloneDeep(rootStore.pianoRollStore.selectedNoteIds),
     selectedControllerEventIds: cloneDeep(
       rootStore.controlStore.selectedEventIds,
-    ),
-    arrangeSelection: cloneDeep(rootStore.arrangeViewStore.selection),
-    arrangeSelectedEventIds: cloneDeep(
-      rootStore.arrangeViewStore.selectedEventIds,
     ),
   }
 }
@@ -41,9 +34,6 @@ const restoreState =
     rootStore.pianoRollStore.selectedNoteIds = serializedState.selectedNoteIds
     rootStore.controlStore.selectedEventIds =
       serializedState.selectedControllerEventIds
-    rootStore.arrangeViewStore.selection = serializedState.arrangeSelection
-    rootStore.arrangeViewStore.selectedEventIds =
-      serializedState.arrangeSelectedEventIds
   }
 
 export const pushHistory = (rootStore: RootStore) => () => {

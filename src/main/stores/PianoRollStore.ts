@@ -16,7 +16,6 @@ import { Selection, getSelectionBounds } from "../../common/selection/Selection"
 import Track, { TrackEvent, isNoteEvent } from "../../common/track"
 import { NoteCoordTransform } from "../../common/transform"
 import { Layout } from "../Constants"
-import { InstrumentSetting } from "../components/InstrumentBrowser/InstrumentBrowser"
 import RootStore from "./RootStore"
 import { RulerStore } from "./RulerStore"
 
@@ -34,11 +33,11 @@ export default class PianoRollStore {
   readonly rulerStore: RulerStore
 
   scrollLeftTicks = 0
-  scrollTopKeys = 70 // 中央くらいの音程にスクロールしておく
+  scrollTopKeys = 70
   SCALE_X_MIN = 0.15
-  SCALE_X_MAX = 15
+  SCALE_X_MAX = 150
   SCALE_Y_MIN = 0.5
-  SCALE_Y_MAX = 4
+  SCALE_Y_MAX = 40
   notesCursor = "auto"
   mouseMode: PianoRollMouseMode = "pencil"
   scaleX = 1
@@ -51,10 +50,6 @@ export default class PianoRollStore {
   selectedNoteIds: number[] = []
   lastNoteDuration: number | null = null
   openInstrumentBrowser = false
-  instrumentBrowserSetting: InstrumentSetting = {
-    isRhythmTrack: false,
-    programNumber: 0,
-  }
   notGhostTracks: Set<number> = new Set()
   canvasWidth: number = 0
   canvasHeight: number = 0
@@ -80,7 +75,6 @@ export default class PianoRollStore {
       selectedNoteIds: observable,
       lastNoteDuration: observable,
       openInstrumentBrowser: observable,
-      instrumentBrowserSetting: observable,
       notGhostTracks: observable,
       canvasWidth: observable,
       canvasHeight: observable,
@@ -120,12 +114,12 @@ export default class PianoRollStore {
       const { autoScroll, scrollLeftTicks, transform, canvasWidth } = this
 
       // keep scroll position to cursor
-      if (autoScroll && isPlaying) {
-        const screenX = transform.getX(position - scrollLeftTicks)
-        if (screenX > canvasWidth * 0.7 || screenX < 0) {
-          this.scrollLeftTicks = position
-        }
-      }
+      // if (autoScroll && isPlaying) {
+      //   const screenX = transform.getX(position - scrollLeftTicks)
+      //   if (screenX > canvasWidth * 0.7 || screenX < 0) {
+      //     this.scrollLeftTicks = position
+      //   }
+      // }
     })
 
     // reset selection when change track
@@ -185,6 +179,8 @@ export default class PianoRollStore {
   }
 
   scaleAroundPointX(scaleXDelta: number, pixelX: number) {
+    this.scaleX = 1
+    console.log("==== ScaleX ====", this.scaleX, scaleXDelta)
     const pixelXInTicks0 = this.transform.getTicks(this.scrollLeft + pixelX)
     this.scaleX = clamp(
       this.scaleX * (1 + scaleXDelta),
@@ -197,6 +193,7 @@ export default class PianoRollStore {
   }
 
   scaleAroundPointY(scaleYDelta: number, pixelY: number) {
+    this.scaleY = 1
     const pixelYInKeys0 = this.transform.getNoteNumberFractional(
       this.scrollTop + pixelY,
     )
@@ -229,6 +226,10 @@ export default class PianoRollStore {
     )
   }
 
+  get unitTransform(): NoteCoordTransform {
+    return new NoteCoordTransform(Layout.pixelsPerTick, Layout.keyHeight, 127)
+  }
+
   get windowedEvents(): TrackEvent[] {
     const { transform, scrollLeft, canvasWidth, selectedTrack: track } = this
     if (track === undefined) {
@@ -241,6 +242,38 @@ export default class PianoRollStore {
       scrollLeft,
       canvasWidth,
     )
+  }
+
+  get origNotes(): PianoNoteItem[] {
+    const {
+      unitTransform: transform,
+      windowedEvents,
+      selectedNoteIds,
+      selectedTrack: track,
+      selectedTrackId,
+    } = this
+
+    if (track === undefined) {
+      return []
+    }
+    const isRhythmTrack = track.isRhythmTrack
+
+    const noteEvents = windowedEvents.filter(isNoteEvent)
+
+    return noteEvents.map((e): PianoNoteItem => {
+      const rect = isRhythmTrack
+        ? transform.getDrumRect(e)
+        : transform.getRect(e)
+      const isSelected = selectedNoteIds.includes(e.id)
+      return {
+        ...rect,
+        id: e.id,
+        velocity: e.velocity,
+        isSelected,
+        isDrum: isRhythmTrack,
+        trackId: selectedTrackId,
+      }
+    })
   }
 
   get notes(): PianoNoteItem[] {

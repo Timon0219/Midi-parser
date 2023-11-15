@@ -8,18 +8,19 @@ import {
   useMemo,
   useState,
 } from "react"
+import { setSong } from "../../../actions"
 import { matrixFromTranslation } from "../../../helpers/matrix"
-import { useContextMenu } from "../../../hooks/useContextMenu"
 import { useStores } from "../../../hooks/useStores"
 import { Beats } from "../../GLNodes/Beats"
 import { Cursor } from "../../GLNodes/Cursor"
 import { Selection } from "../../GLNodes/Selection"
 import NoteMouseHandler from "../MouseHandler/NoteMouseHandler"
+import { songFromFile } from "../PianoRollEditor"
 import { PianoRollStageProps } from "../PianoRollStage"
-import { PianoSelectionContextMenu } from "../PianoSelectionContextMenu"
 import { GhostNotes } from "./GhostNotes"
 import { Lines } from "./Lines"
 import { Notes } from "./Notes"
+// import {setScrollTopInPixels}
 
 export const PianoRollCanvas: FC<PianoRollStageProps> = observer(
   ({ width, height }) => {
@@ -34,20 +35,29 @@ export const PianoRollCanvas: FC<PianoRollStageProps> = observer(
         cursorX,
         selectionBounds,
       },
+      player,
     } = rootStore
-
     const [mouseHandler] = useState(new NoteMouseHandler(rootStore))
-
-    const { onContextMenu, menuProps } = useContextMenu()
-
+    const prevStore = [...pianoRollStore.origNotes]
     const handleContextMenu: MouseEventHandler = useCallback((e) => {
       if (pianoRollStore.mouseMode === "selection") {
         e.stopPropagation()
-        onContextMenu(e)
         return
       }
     }, [])
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const song = await songFromFile("test.mid")
+          setSong(rootStore)(song)
+        } catch (error) {
+          // Handle errors, e.g., log or show an alert
+          console.error("Error fetching data:", error)
+        }
+      }
 
+      fetchData()
+    }, [])
     useEffect(() => {
       pianoRollStore.canvasWidth = width
     }, [width])
@@ -55,6 +65,55 @@ export const PianoRollCanvas: FC<PianoRollStageProps> = observer(
     useEffect(() => {
       pianoRollStore.canvasHeight = height
     }, [height])
+
+    useEffect(() => {
+      const lastNote = prevStore[prevStore.length - 1]
+      if (lastNote) {
+        const lastPos = lastNote.x + lastNote.width
+        let min = prevStore[0].y
+        let max = prevStore[0].y
+        prevStore.map((item) => {
+          if (min > item.y) min = item.y
+          if (max < item.y) max = item.y
+        })
+        let wscale = 0,
+          hscale = 0
+        wscale =
+          (width / lastPos - 1) / (1.04 + 0.000042 * (2000 - window.innerWidth))
+
+        if (window.innerWidth <= 1024)
+          wscale =
+            (width / lastPos - 1) /
+            (1.08 + 0.00025 * (1024 - window.innerWidth))
+
+        if (window.innerWidth <= 768)
+          wscale =
+            (width / lastPos - 1) / (1.12 + 0.00059 * (768 - window.innerWidth))
+
+        if (window.innerWidth <= 400)
+          wscale =
+            (width / lastPos - 1) / (1.37 + 0.004 * (400 - window.innerWidth))
+        hscale = height / (max - min + prevStore[0].height) - 1
+        if (width != 0) pianoRollStore.scaleAroundPointX(wscale, 0)
+        if (height != 0) pianoRollStore.scaleAroundPointY((hscale * 7) / 10, 0)
+
+        let minY = pianoRollStore.notes[0]?.y,
+          maxY = pianoRollStore.notes[0]?.y
+        pianoRollStore.notes.map((item) => {
+          if (minY > item.y) minY = item.y
+          if (maxY < item.y) maxY = item.y
+        })
+        const scrollTopPos =
+          (height - (maxY + pianoRollStore.notes[0]?.height - minY)) / 2
+        pianoRollStore.setScrollTopInPixels(minY - scrollTopPos)
+      }
+    }, [rootStore.song, width, height])
+
+    useEffect(() => {
+      if (player.isPlaying && cursorX >= window.innerWidth) {
+        player.reset()
+      }
+    }, [cursorX])
 
     const scrollXMatrix = useMemo(
       () => matrixFromTranslation(-scrollLeft, 0),
@@ -70,14 +129,12 @@ export const PianoRollCanvas: FC<PianoRollStageProps> = observer(
       () => matrixFromTranslation(-scrollLeft, -scrollTop),
       [scrollLeft, scrollTop],
     )
-
     return (
       <>
         <GLCanvas
           width={width}
           height={height}
           style={{ cursor: notesCursor }}
-          onContextMenu={handleContextMenu}
           onMouseDown={mouseHandler.onMouseDown}
           onMouseMove={mouseHandler.onMouseMove}
           onMouseUp={mouseHandler.onMouseUp}
@@ -95,7 +152,6 @@ export const PianoRollCanvas: FC<PianoRollStageProps> = observer(
             <Selection rect={selectionBounds} zIndex={4} />
           </Transform>
         </GLCanvas>
-        <PianoSelectionContextMenu {...menuProps} />
       </>
     )
   },

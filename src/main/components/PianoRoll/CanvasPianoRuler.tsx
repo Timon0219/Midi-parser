@@ -4,15 +4,12 @@ import React, { FC, MouseEventHandler, useCallback, useState } from "react"
 import { BeatWithX } from "../../../common/helpers/mapBeats"
 import { LoopSetting } from "../../../common/player"
 import { Theme } from "../../../common/theme/Theme"
-import { setLoopBegin, setLoopEnd, updateTimeSignature } from "../../actions"
 import { Layout } from "../../Constants"
-import { useContextMenu } from "../../hooks/useContextMenu"
+import { setLoopBegin, setLoopEnd, updateTimeSignature } from "../../actions"
 import { useStores } from "../../hooks/useStores"
 import { useTheme } from "../../hooks/useTheme"
 import { RulerStore, TimeSignature } from "../../stores/RulerStore"
 import DrawCanvas from "../DrawCanvas"
-import { RulerContextMenu } from "./RulerContextMenu"
-import { TimeSignatureDialog } from "./TimeSignatureDialog"
 
 const textPadding = 2
 
@@ -26,8 +23,6 @@ function drawRuler(
   ctx.lineWidth = 1
   ctx.beginPath()
 
-  // 密過ぎる時は省略する
-  // Omit when it is too high
   const shouldOmit = beats.length > 1 && beats[1].x - beats[0].x <= 5
 
   beats.forEach(({ beat, measure, x }) => {
@@ -41,10 +36,6 @@ function drawRuler(
       ctx.lineTo(x, height)
     }
 
-    // 小節番号
-    // War Number
-    // 省略時は2つに1つ描画
-    // Default 1 drawing one for two
     if (isTop && (!shouldOmit || measure % 2 === 0)) {
       ctx.textBaseline = "top"
       ctx.font = `12px ${theme.canvasFont}`
@@ -164,7 +155,6 @@ const TIME_SIGNATURE_HIT_WIDTH = 20
 const PianoRuler: FC<PianoRulerProps> = observer(({ rulerStore, style }) => {
   const rootStore = useStores()
   const theme = useTheme()
-  const { onContextMenu, menuProps } = useContextMenu()
   const [timeSignatureDialogState, setTimeSignatureDialogState] =
     useState<TimeSignatureDialogState | null>(null)
   const [rightClickTick, setRightClickTick] = useState(0)
@@ -246,7 +236,6 @@ const PianoRuler: FC<PianoRulerProps> = observer(({ rulerStore, style }) => {
   const onContextMenuWrapper: MouseEventHandler = useCallback(
     (e) => {
       setRightClickTick(rulerStore.getQuantizedTick(e.nativeEvent.offsetX))
-      onContextMenu(e)
     },
     [rulerStore],
   )
@@ -260,18 +249,6 @@ const PianoRuler: FC<PianoRulerProps> = observer(({ rulerStore, style }) => {
         onMouseDown={onMouseDown}
         onContextMenu={onContextMenuWrapper}
         style={style}
-      />
-      <RulerContextMenu
-        {...menuProps}
-        rulerStore={rulerStore}
-        tick={rightClickTick}
-      />
-      <TimeSignatureDialog
-        open={timeSignatureDialogState != null}
-        initialNumerator={timeSignatureDialogState?.numerator}
-        initialDenominator={timeSignatureDialogState?.denominator}
-        onClose={closeOpenTimeSignatureDialog}
-        onClickOK={okTimeSignatureDialog}
       />
     </>
   )

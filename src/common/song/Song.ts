@@ -1,4 +1,3 @@
-import { DocumentReference } from "firebase/firestore"
 import pullAt from "lodash/pullAt"
 import {
   action,
@@ -9,12 +8,11 @@ import {
   transaction,
 } from "mobx"
 import { createModelSchema, list, object, primitive } from "serializr"
-import { FirestoreSong, FirestoreSongData } from "../../firebase/song"
 import { TIME_BASE } from "../../main/Constants"
 import { isNotUndefined } from "../helpers/array"
 import { Measure } from "../measure/Measure"
 import { getMeasuresFromConductorTrack } from "../measure/MeasureList"
-import { collectAllEvents, PlayerEvent } from "../player/PlayerEvent"
+import { PlayerEvent, collectAllEvents } from "../player/PlayerEvent"
 import Track from "../track"
 
 const END_MARGIN = 480 * 30
@@ -25,8 +23,6 @@ export default class Song {
   timebase: number = TIME_BASE
   name: string = ""
   fileHandle: FileSystemFileHandle | null = null
-  firestoreReference: DocumentReference<FirestoreSong> | null = null
-  firestoreDataReference: DocumentReference<FirestoreSongData> | null = null
   isSaved = true
 
   constructor() {
@@ -55,7 +51,6 @@ export default class Song {
   }
 
   insertTrack(t: Track, index: number) {
-    // 最初のトラックは Conductor Track なので channel を設定しない
     if (t.channel === undefined && this.tracks.length > 0) {
       t.channel = t.channel || this.tracks.length - 1
     }

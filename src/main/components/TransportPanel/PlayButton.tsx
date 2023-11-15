@@ -6,16 +6,21 @@ import { Localized } from "../../../components/Localized"
 import { Tooltip } from "../../../components/Tooltip"
 import { CircleButton } from "./CircleButton"
 
+declare global {
+  interface Window {
+    colors: any
+  }
+}
 export const StyledButton = styled(CircleButton)`
-  background: ${({ theme }) => theme.themeColor};
+  background: ${window.colors.primary};
 
   &:hover {
-    background: ${({ theme }) => theme.themeColor};
+    background: ${window.colors.primary};
     opacity: 0.8;
   }
 
   &.active {
-    background: ${({ theme }) => theme.themeColor};
+    background: ${window.colors.primary};
   }
 `
 

@@ -1,7 +1,6 @@
 import styled from "@emotion/styled"
 import FastForward from "mdi-react/FastForwardIcon"
 import FastRewind from "mdi-react/FastRewindIcon"
-import FiberManualRecord from "mdi-react/FiberManualRecordIcon"
 import Loop from "mdi-react/LoopIcon"
 import MetronomeIcon from "mdi-react/MetronomeIcon"
 import Stop from "mdi-react/StopIcon"
@@ -17,9 +16,9 @@ import {
   stop,
   toggleEnableLoop,
 } from "../../actions"
-import { toggleRecording } from "../../actions/recording"
 import { useStores } from "../../hooks/useStores"
 import { CircleButton } from "./CircleButton"
+import { MiddlePlayButton } from "./MiddlePlayButton"
 import { PlayButton } from "./PlayButton"
 import { TempoForm } from "./TempoForm"
 
@@ -32,12 +31,6 @@ const Toolbar = styled.div`
   border-top: 1px solid ${({ theme }) => theme.dividerColor};
   height: 3rem;
   box-sizing: border-box;
-`
-
-const RecordButton = styled(CircleButton)`
-  &.active {
-    color: ${({ theme }) => theme.recordColor};
-  }
 `
 
 const LoopButton = styled(CircleButton)`
@@ -69,6 +62,9 @@ export const ToolbarSeparator = styled.div`
   margin: 0.4em 1em;
   width: 1px;
   height: 1rem;
+  @media (max-width: 560px) {
+    display: none;
+  }
 `
 
 export const Right = styled.div`
@@ -78,19 +74,16 @@ export const Right = styled.div`
 
 export const TransportPanel: FC = observer(() => {
   const rootStore = useStores()
-  const { player, midiDeviceStore, midiRecorder, synth } = rootStore
+  const { player, synth } = rootStore
 
   const { isPlaying, isMetronomeEnabled, loop } = player
-  const isRecording = midiRecorder.isRecording
-  const canRecording =
-    Object.values(midiDeviceStore.enabledInputs).filter((e) => e).length > 0
   const isSynthLoading = synth.isLoading
 
   const onClickPlay = playOrPause(rootStore)
+
   const onClickStop = stop(rootStore)
   const onClickBackward = rewindOneBar(rootStore)
   const onClickForward = fastForwardOneBar(rootStore)
-  const onClickRecord = toggleRecording(rootStore)
   const onClickEnableLoop = toggleEnableLoop(rootStore)
   const onClickMetronone = useCallback(() => {
     player.isMetronomeEnabled = !player.isMetronomeEnabled
@@ -112,22 +105,8 @@ export const TransportPanel: FC = observer(() => {
           <Stop />
         </CircleButton>
       </Tooltip>
-
+      <MiddlePlayButton onClick={onClickPlay} isPlaying={isPlaying} />
       <PlayButton onClick={onClickPlay} isPlaying={isPlaying} />
-
-      {canRecording && (
-        <Tooltip
-          title={<Localized default="Record">record</Localized>}
-          side="top"
-        >
-          <RecordButton
-            onClick={onClickRecord}
-            className={isRecording ? "active" : undefined}
-          >
-            <FiberManualRecord />
-          </RecordButton>
-        </Tooltip>
-      )}
 
       <Tooltip
         title={<Localized default="Fast Forward">fast-forward</Localized>}

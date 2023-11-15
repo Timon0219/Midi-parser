@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <meta charset="UTF-8" />
 <title>signal</title>
 <head>
@@ -6,20 +6,6 @@
     content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
     name="viewport"
   />
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script
-    async
-    src="https://www.googletagmanager.com/gtag/js?id=UA-179088031-1"
-  ></script>
-  <script>
-    window.dataLayer = window.dataLayer || []
-    function gtag() {
-      dataLayer.push(arguments)
-    }
-    gtag("js", new Date())
-
-    gtag("config", "UA-179088031-1")
-  </script>
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -38,10 +24,21 @@
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/service-worker.js", {
-          scope: "/edit",
+          scope: "/",
         })
         .then(() => console.log("service worker loaded successfully"))
         .catch((e) => console.error(e))
+    }
+    window.colors = {
+      primary: "rgb(17, 123, 255)",
+      // primary: "rgb(255, 211, 36)",
+      // primary: "rgb(255, 211, 36)",
+      backgroundColor: "rgb(186, 182, 182)",
+      // backgroundColor: "rgb(158, 156, 161)",
+      // backgroundColor: "rgb(189, 185, 186)",
+      blackKeyLane: "rgb(144, 142, 144)",
+      // blackKeyLane: "rgb(92, 90, 94)",
+      // blackKeyLane: "rgb(144, 142, 144)",
     }
   </script>
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -50,5 +47,5 @@
   <link rel="apple-touch-icon" sizes="192x192" href="/icon-192x192.png" />
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root" class="root"></div>
 </body>

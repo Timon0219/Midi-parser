@@ -7,6 +7,11 @@ import { useStores } from "../../../hooks/useStores"
 import { useTheme } from "../../../hooks/useTheme"
 import { HorizontalGrid } from "./HorizontalGrid"
 
+declare global {
+  interface Window {
+    colors: any
+  }
+}
 export const Lines: FC<{ zIndex: number }> = observer(({ zIndex }) => {
   const theme = useTheme()
   const rootStore = useStores()
@@ -24,7 +29,7 @@ export const Lines: FC<{ zIndex: number }> = observer(({ zIndex }) => {
       }}
       color={colorToVec4(Color(theme.dividerColor).alpha(0.2))}
       highlightedColor={colorToVec4(Color(theme.dividerColor).alpha(0.5))}
-      blackLaneColor={colorToVec4(Color(theme.pianoBlackKeyLaneColor))}
+      blackLaneColor={colorToVec4(Color(window.colors.blackKeyLane))}
       height={scaleY * Layout.keyHeight}
       zIndex={zIndex}
     />
